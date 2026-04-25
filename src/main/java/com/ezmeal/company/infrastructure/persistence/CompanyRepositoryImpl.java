@@ -1,10 +1,13 @@
 package com.ezmeal.company.infrastructure.persistence;
 
+import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.domain.model.Company;
 import com.ezmeal.company.domain.repository.CompanyRepository;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,13 +22,18 @@ public class CompanyRepositoryImpl implements CompanyRepository{
     }
 
     @Override
-    public Optional<Company> findById(UUID companyId) {
-        return jpaCompanyRepository.findById(companyId);
+    public Optional<Company> findByIdAndDeletedAtIsNull(UUID companyId) {
+        return jpaCompanyRepository.findByIdAndDeletedAtIsNull(companyId);
     }
 
     @Override
-    public Boolean existsByName(String name) {
-        return jpaCompanyRepository.existsByName(name);
+    public Boolean existsByNameAndDeletedAtIsNull(String name) {
+        return jpaCompanyRepository.existsByNameAndDeletedAtIsNull(name);
+    }
+
+    @Override
+    public Page<Company> searchCompanies(CompanySearchRequest request, Pageable pageable) {
+        return jpaCompanyRepository.searchCompanies(request,pageable);
     }
 
 }
