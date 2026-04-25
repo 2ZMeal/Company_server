@@ -1,0 +1,61 @@
+package com.ezmeal.company.application.service;
+
+import com.ezmeal.company.application.dto.request.CompanyCreateRequest;
+import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
+import com.ezmeal.company.application.dto.response.CompanyResponse;
+import com.ezmeal.company.domain.model.Company;
+import com.ezmeal.company.domain.repository.CompanyRepository;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class CompanyService {
+
+    private final CompanyRepository companyRepository;
+
+    //인증인가가 완료되면 managerUserId는 request에서 빼고 인증 정보에서 조회예정
+    //논리적 삭제가 baseEnitity에 구현되면 jpa를 통해 검증 예정
+
+    //업체 생성
+    @Transactional
+    public CompanyResponse createCompany(CompanyCreateRequest companyCreateRequest) {
+
+        boolean exists = companyRepository.existsByName(companyCreateRequest.name());
+        if (exists) {
+            throw new RuntimeException("중복된 이름이 존재합니다.");
+        }
+
+        Company company = new Company(
+                companyCreateRequest.managerUserId(),
+                companyCreateRequest.name(),
+                companyCreateRequest.lotAddress(),
+                companyCreateRequest.roadAddress(),
+                companyCreateRequest.description()
+        );
+
+        Company companySaved = companyRepository.save(company);
+
+        return CompanyResponse.from(companySaved);
+    }
+
+
+    //업체 수정
+    @Transactional
+    public CompanyResponse updateCompany(UUID companyId, CompanyUpdateRequest companyUpdateRequest) {
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
+
+        company.update(
+                companyUpdateRequest.name(),
+                companyUpdateRequest.lotAddress(),
+                companyUpdateRequest.roadAddress(),
+                companyUpdateRequest.description()
+        );
+
+        return CompanyResponse.from(company);
+    }
+}

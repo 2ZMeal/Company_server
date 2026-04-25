@@ -38,7 +38,7 @@ public class Company {
     @Column(name = "description", length = 255)
     private String description;
 
-    //업체 생성정보
+    //업체 생성 정보
     public Company(UUID managerUserId, String name, String lotAddress, String roadAddress,
                    String description) {
         validate(managerUserId, name, lotAddress, roadAddress);
