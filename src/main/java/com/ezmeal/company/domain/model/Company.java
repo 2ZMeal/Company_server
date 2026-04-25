@@ -6,11 +6,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
+
+
+
+//추후 baseEntity가 구현되면 상속받고 deleteAt수정예정
 
 @Entity
 @Getter
@@ -38,6 +43,10 @@ public class Company {
     @Column(name = "description", length = 255)
     private String description;
 
+    // 임시 논리삭제
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     //업체 생성 정보
     public Company(UUID managerUserId, String name, String lotAddress, String roadAddress,
                    String description) {
@@ -64,6 +73,15 @@ public class Company {
             this.description = description;
         }
     }
+
+    //업체 논리 삭제
+    public void delete() {
+        if (this.deletedAt != null) {
+            throw new IllegalStateException("이미 삭제된 업체입니다.");
+        }
+        this.deletedAt = LocalDateTime.now();
+    }
+
 
     //빠지면 안되는 값들 검증
     private void validate(UUID managerUserId, String name, String lotAddress, String roadAddress) {

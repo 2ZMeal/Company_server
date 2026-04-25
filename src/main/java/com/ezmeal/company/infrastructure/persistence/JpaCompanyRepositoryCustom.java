@@ -1,16 +1,10 @@
-package com.ezmeal.company.domain.repository;
+package com.ezmeal.company.infrastructure.persistence;
 
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.domain.model.Company;
-import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface CompanyRepository {
-
-    Company save(Company company);
-    Optional<Company> findByIdAndDeletedAtIsNull(UUID companyId);
-    Boolean existsByNameAndDeletedAtIsNull(String name);
+public interface JpaCompanyRepositoryCustom {
     Page<Company> searchCompanies(CompanySearchRequest request, Pageable pageable);
 }

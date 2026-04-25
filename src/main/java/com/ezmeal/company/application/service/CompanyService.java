@@ -1,12 +1,16 @@
 package com.ezmeal.company.application.service;
 
 import com.ezmeal.company.application.dto.request.CompanyCreateRequest;
+import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
 import com.ezmeal.company.application.dto.response.CompanyResponse;
+import com.ezmeal.company.application.dto.response.PageResponse;
 import com.ezmeal.company.domain.model.Company;
 import com.ezmeal.company.domain.repository.CompanyRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +21,12 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     //인증인가가 완료되면 managerUserId는 request에서 빼고 인증 정보에서 조회예정
-    //논리적 삭제가 baseEnitity에 구현되면 jpa를 통해 검증 예정
 
     //업체 생성
     @Transactional
     public CompanyResponse createCompany(CompanyCreateRequest companyCreateRequest) {
 
-        boolean exists = companyRepository.existsByName(companyCreateRequest.name());
+        boolean exists = companyRepository.existsByNameAndDeletedAtIsNull(companyCreateRequest.name());
         if (exists) {
             throw new RuntimeException("중복된 이름이 존재합니다.");
         }
@@ -46,7 +49,7 @@ public class CompanyService {
     @Transactional
     public CompanyResponse updateCompany(UUID companyId, CompanyUpdateRequest companyUpdateRequest) {
 
-        Company company = companyRepository.findById(companyId)
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
 
         company.update(
@@ -57,5 +60,34 @@ public class CompanyService {
         );
 
         return CompanyResponse.from(company);
+    }
+
+    //업체 논리 삭제
+    @Transactional
+    public void deleteCompany(UUID companyId) {
+
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
+                .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
+
+        company.delete();
+    }
+
+    //업체 상세 조회
+    @Transactional(readOnly = true)
+    public CompanyResponse getCompany(UUID companyId) {
+
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
+                .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
+
+        return CompanyResponse.from(company);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<CompanyResponse> getCompanies(CompanySearchRequest companySearchRequest, Pageable pageable) {
+
+        Page<Company> companies = companyRepository.searchCompanies(companySearchRequest, pageable);
+        Page<CompanyResponse> responses = companies.map(CompanyResponse::from);
+
+        return PageResponse.from(responses);
     }
 }
