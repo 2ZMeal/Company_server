@@ -82,6 +82,7 @@ public class CompanyService {
         return CompanyResponse.from(company);
     }
 
+    //업체 목록 조회
     @Transactional(readOnly = true)
     public PageResponse<CompanyResponse> getCompanies(CompanySearchRequest companySearchRequest, Pageable pageable) {
 
