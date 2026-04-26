@@ -1,0 +1,36 @@
+@companyId = 44235e26-ae56-4095-a660-37d64883cf36
+
+### 업체 생성
+POST http://localhost:19082/api/v1/companies
+Content-Type: application/json
+
+{
+  "managerUserId": "11111111-1111-1111-1111-111111111111",
+  "name": "테스트 업체",
+  "lotAddress": "서울시 해운대구 가로수길 12",
+  "roadAddress": "서울시 해운대구 가로수길 12",
+  "description": "HTTP 테스트용 업체"
+}
+
+### 업체 목록조회
+GET http://localhost:19082/api/v1/companies?page=0&size=10
+
+### 업체 이름 검색
+GET http://localhost:19082/api/v1/companies?name=테스트&page=0&size=10
+
+### 업체 상세조회
+GET http://localhost:19082/api/v1/companies/{{companyId}}
+
+### 업체 수정
+PATCH http://localhost:19082/api/v1/companies/{{companyId}}
+Content-Type: application/json
+
+{
+  "name": "수정된 업체",
+  "lotAddress": "서울시 미시시피 쓰촨성 12",
+  "roadAddress": "서울시 미시시피 쓰촨성 12",
+  "description": "수정 테스트"
+}
+
+### 업체 삭제
+DELETE http://localhost:19082/api/v1/companies/{{companyId}}
