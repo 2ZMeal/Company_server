@@ -1,5 +1,6 @@
 package com.ezmeal.company.domain.model;
 
+import com.ezmeal.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +22,7 @@ import org.springframework.util.StringUtils;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_company", schema = "company_service")
-public class Company {
+public class Company extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -42,10 +43,6 @@ public class Company {
 
     @Column(name = "description", length = 255)
     private String description;
-
-    // 임시 논리삭제
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     //업체 생성 정보
     public Company(UUID managerUserId, String name, String lotAddress, String roadAddress,
@@ -72,14 +69,6 @@ public class Company {
         if (description != null) {
             this.description = description;
         }
-    }
-
-    //업체 논리 삭제
-    public void delete() {
-        if (this.deletedAt != null) {
-            throw new IllegalStateException("이미 삭제된 업체입니다.");
-        }
-        this.deletedAt = LocalDateTime.now();
     }
 
 

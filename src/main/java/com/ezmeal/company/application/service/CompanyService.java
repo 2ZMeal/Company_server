@@ -1,5 +1,6 @@
 package com.ezmeal.company.application.service;
 
+import com.ezmeal.common.exception.CustomException;
 import com.ezmeal.company.application.dto.request.CompanyCreateRequest;
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
@@ -7,6 +8,7 @@ import com.ezmeal.company.application.dto.response.CompanyResponse;
 import com.ezmeal.company.application.dto.response.PageResponse;
 import com.ezmeal.company.domain.model.Company;
 import com.ezmeal.company.domain.repository.CompanyRepository;
+import com.ezmeal.company.domain.exception.CompanyErrorCode;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +30,7 @@ public class CompanyService {
 
         boolean exists = companyRepository.existsByNameAndDeletedAtIsNull(companyCreateRequest.name());
         if (exists) {
-            throw new RuntimeException("중복된 이름이 존재합니다.");
+            throw new CustomException(CompanyErrorCode.COMPANY_ALREADY_EXISTS);
         }
 
         Company company = new Company(
@@ -50,7 +52,7 @@ public class CompanyService {
     public CompanyResponse updateCompany(UUID companyId, CompanyUpdateRequest companyUpdateRequest) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
-                .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
         company.update(
                 companyUpdateRequest.name(),
@@ -64,12 +66,12 @@ public class CompanyService {
 
     //업체 논리 삭제
     @Transactional
-    public void deleteCompany(UUID companyId) {
+    public void deleteCompany(UUID companyId,String deletedBy) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
-                .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
-        company.delete();
+        company.delete(deletedBy);
     }
 
     //업체 상세 조회
@@ -77,7 +79,7 @@ public class CompanyService {
     public CompanyResponse getCompany(UUID companyId) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
-                .orElseThrow(() -> new RuntimeException("업체를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
         return CompanyResponse.from(company);
     }

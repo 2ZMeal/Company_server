@@ -1,5 +1,6 @@
 package com.ezmeal.company.presentation.controller;
 
+import com.ezmeal.common.response.CommonApiResponse;
 import com.ezmeal.company.application.dto.request.CompanyCreateRequest;
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// 공통 응답 구조가 Common에 구현되면 CompanyResponse를 공통 응답 구조로 감쌀 예정
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/companies")
@@ -31,54 +31,54 @@ public class CompanyController {
 
     //업체 생성 요청
     @PostMapping
-    public ResponseEntity<CompanyResponse> createCompany(
+    public ResponseEntity<CommonApiResponse<CompanyResponse>> createCompany(
             @RequestBody CompanyCreateRequest companyCreateRequest
     ) {
         CompanyResponse response = companyService.createCompany(companyCreateRequest);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonApiResponse.success("업체가 생성되었습니다.", response));
     }
 
     //업체 상세조회 요청
     @GetMapping("/{companyId}")
-    public ResponseEntity<CompanyResponse> getCompany(
+    public ResponseEntity<CommonApiResponse<CompanyResponse>> getCompany(
             @PathVariable UUID companyId
     ) {
         CompanyResponse response = companyService.getCompany(companyId);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CommonApiResponse.success("업체가 상세조회 되었습니다.", response));
     }
 
     //업체 목록조회 요청
     @GetMapping
-    public ResponseEntity<PageResponse<CompanyResponse>> getCompanies(
+    public ResponseEntity<CommonApiResponse<PageResponse<CompanyResponse>>> getCompanies(
             @RequestParam(required = false) String name,
             Pageable pageable
     ) {
         CompanySearchRequest companySearchRequest = new CompanySearchRequest(name);
         PageResponse<CompanyResponse> response = companyService.getCompanies(companySearchRequest, pageable);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CommonApiResponse.success("업체가 목록조회 되었습니다.", response));
     }
 
     //업체 수정 요청
     @PatchMapping("/{companyId}")
-    public ResponseEntity<CompanyResponse> updateCompany(
+    public ResponseEntity<CommonApiResponse<CompanyResponse>> updateCompany(
             @PathVariable UUID companyId,
             @RequestBody CompanyUpdateRequest companyUpdateRequest
     ) {
         CompanyResponse response = companyService.updateCompany(companyId, companyUpdateRequest);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CommonApiResponse.success("업체가 수정 되었습니다.", response));
     }
 
     //업체 삭제 요청
     @DeleteMapping("/{companyId}")
-    public ResponseEntity<Void> deleteCompany(
+    public ResponseEntity<CommonApiResponse<Void>> deleteCompany(
             @PathVariable UUID companyId
     ) {
-        companyService.deleteCompany(companyId);
+        companyService.deleteCompany(companyId, "SYSTEM");
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(CommonApiResponse.success());
     }
 }
