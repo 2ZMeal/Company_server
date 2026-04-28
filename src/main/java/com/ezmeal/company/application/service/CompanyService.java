@@ -6,9 +6,13 @@ import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
 import com.ezmeal.company.application.dto.response.CompanyResponse;
 import com.ezmeal.company.application.dto.response.PageResponse;
+import com.ezmeal.company.domain.event.CompanyEventProducer;
+import com.ezmeal.company.domain.event.payload.CompanyCreatedEvent;
+import com.ezmeal.company.domain.event.payload.CompanyDeletedEvent;
+import com.ezmeal.company.domain.event.payload.CompanyUpdatedEvent;
+import com.ezmeal.company.domain.exception.CompanyErrorCode;
 import com.ezmeal.company.domain.model.Company;
 import com.ezmeal.company.domain.repository.CompanyRepository;
-import com.ezmeal.company.domain.exception.CompanyErrorCode;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final CompanyEventProducer companyEventProducer;
 
     //인증인가가 완료되면 managerUserId는 request에서 빼고 인증 정보에서 조회예정
 
@@ -43,6 +48,10 @@ public class CompanyService {
 
         Company companySaved = companyRepository.save(company);
 
+        CompanyCreatedEvent event = CompanyCreatedEvent.of(companySaved.getId(), companySaved.getName(),
+                companySaved.getLotAddress(), companySaved.getRoadAddress(), companySaved.getDescription());
+        companyEventProducer.publishCreatedEvent(event);
+
         return CompanyResponse.from(companySaved);
     }
 
@@ -61,17 +70,24 @@ public class CompanyService {
                 companyUpdateRequest.description()
         );
 
+        CompanyUpdatedEvent event = CompanyUpdatedEvent.of(company.getId(), company.getName(), company.getLotAddress(),
+                company.getRoadAddress(), company.getDescription());
+        companyEventProducer.publishUpdatedEvent(event);
+
         return CompanyResponse.from(company);
     }
 
     //업체 논리 삭제
     @Transactional
-    public void deleteCompany(UUID companyId,String deletedBy) {
+    public void deleteCompany(UUID companyId, String deletedBy) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
         company.delete(deletedBy);
+
+        CompanyDeletedEvent event = CompanyDeletedEvent.of(company.getId());
+        companyEventProducer.publishDeletedEvent(event);
     }
 
     //업체 상세 조회

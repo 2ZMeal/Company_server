@@ -1,4 +1,4 @@
-@companyId = 44235e26-ae56-4095-a660-37d64883cf36
+@companyId = 316e962d-8bd0-47fc-a191-f1f418c7a7d5
 
 ### 업체 생성
 POST http://localhost:19082/api/v1/companies
@@ -26,10 +26,10 @@ PATCH http://localhost:19082/api/v1/companies/{{companyId}}
 Content-Type: application/json
 
 {
-  "name": "수정된 업체",
-  "lotAddress": "서울시 미시시피 쓰촨성 12",
-  "roadAddress": "서울시 미시시피 쓰촨성 12",
-  "description": "수정 테스트"
+  "name": "kafka test 수정된 업체",
+  "lotAddress": "함겸북도 베이징 하와이 12",
+  "roadAddress": "함겸북도 베이징 하와이 12",
+  "description": "kafka 수정 테스트"
 }
 
 ### 업체 삭제
