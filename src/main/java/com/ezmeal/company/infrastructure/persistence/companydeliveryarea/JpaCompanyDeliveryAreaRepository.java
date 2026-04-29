@@ -2,6 +2,7 @@ package com.ezmeal.company.infrastructure.persistence.companydeliveryarea;
 
 import com.ezmeal.company.domain.model.CompanyDeliveryArea;
 import com.ezmeal.company.domain.model.DeliveryRegion;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,9 +14,10 @@ public interface JpaCompanyDeliveryAreaRepository extends JpaRepository<CompanyD
             UUID companyId
     );
 
-    boolean existsByCompany_IdAndRegionAndEstimatedDeliveryMinutesAndDeletedAtIsNull(
+    boolean existsByCompany_IdAndRegionAndDeletedAtIsNull(
             UUID companyId,
-            DeliveryRegion region,
-            Integer estimatedDeliveryMinutes
+            DeliveryRegion region
     );
+
+    List<CompanyDeliveryArea> findAllByCompany_IdAndDeletedAtIsNull(UUID companyId);
 }
