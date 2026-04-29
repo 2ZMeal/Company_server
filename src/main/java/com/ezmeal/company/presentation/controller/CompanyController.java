@@ -2,11 +2,15 @@ package com.ezmeal.company.presentation.controller;
 
 import com.ezmeal.common.response.CommonApiResponse;
 import com.ezmeal.company.application.dto.request.CompanyCreateRequest;
+import com.ezmeal.company.application.dto.request.CompanyDeliveryAreaRequest;
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
+import com.ezmeal.company.application.dto.response.CompanyDeliveryAreaResponse;
 import com.ezmeal.company.application.dto.response.CompanyResponse;
 import com.ezmeal.company.application.dto.response.PageResponse;
+import com.ezmeal.company.application.service.CompanyDeliveryAreaService;
 import com.ezmeal.company.application.service.CompanyService;
+import com.ezmeal.company.domain.model.CompanyDeliveryArea;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final CompanyDeliveryAreaService companyDeliveryAreaService;
 
     //업체 생성 요청
     @PostMapping
@@ -80,5 +85,29 @@ public class CompanyController {
         companyService.deleteCompany(companyId, "SYSTEM");
 
         return ResponseEntity.ok(CommonApiResponse.success());
+    }
+
+    @PostMapping("/{companyId}/delivery-areas")
+    public ResponseEntity<CommonApiResponse<CompanyDeliveryAreaResponse>> createCompanyDeliveryArea(
+            @PathVariable UUID companyId,
+            @RequestBody CompanyDeliveryAreaRequest companyDeliveryAreaRequest
+            ){
+        CompanyDeliveryAreaResponse response = companyDeliveryAreaService.create(companyId,companyDeliveryAreaRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonApiResponse.success("배달 가능 지역이 생성되었습니다.", response));
+    }
+
+    @PatchMapping("/{companyId}/delivery-areas/{deliveryAreaId}")
+    public ResponseEntity<CommonApiResponse<CompanyDeliveryAreaResponse>> updateDeliveryArea(
+            @PathVariable UUID companyId,
+            @PathVariable UUID deliveryAreaId,
+            @RequestBody CompanyDeliveryAreaRequest request
+    ) {
+        CompanyDeliveryAreaResponse response =
+                companyDeliveryAreaService.update(deliveryAreaId, companyId, request);
+
+        return ResponseEntity.ok(
+                CommonApiResponse.success("배달 가능 지역이 수정되었습니다.", response)
+        );
     }
 }
