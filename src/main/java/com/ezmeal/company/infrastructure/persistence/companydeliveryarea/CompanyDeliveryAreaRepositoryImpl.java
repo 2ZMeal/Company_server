@@ -1,6 +1,7 @@
 package com.ezmeal.company.infrastructure.persistence.companydeliveryarea;
 
 import com.ezmeal.company.domain.model.CompanyDeliveryArea;
+import com.ezmeal.company.domain.model.CompanyMealPeriod;
 import com.ezmeal.company.domain.model.DeliveryRegion;
 import com.ezmeal.company.domain.repository.CompanyDeliveryAreaRepository;
 import java.util.List;
@@ -26,9 +27,10 @@ public class CompanyDeliveryAreaRepositoryImpl implements CompanyDeliveryAreaRep
     }
 
     @Override
-    public boolean existsByCompany_IdAndRegionAndDeletedAtIsNull(UUID companyId, DeliveryRegion region) {
-        return jpaCompanyDeliveryAreaRepository.existsByCompany_IdAndRegionAndDeletedAtIsNull(
-                companyId, region);
+    public boolean existsByCompany_IdAndRegionAndMealPeriodAndDeletedAtIsNull(UUID companyId, DeliveryRegion region,
+                                                                              CompanyMealPeriod mealPeriod) {
+        return jpaCompanyDeliveryAreaRepository.existsByCompany_IdAndRegionAndMealPeriodAndDeletedAtIsNull(
+                companyId, region, mealPeriod);
     }
 
     @Override

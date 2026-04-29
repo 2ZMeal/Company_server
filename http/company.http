@@ -1,5 +1,5 @@
-@companyId = b141e457-3ed5-4e56-a6cb-d755ca30e10f
-@deliveryAreaId = 39a1580f-ed53-4e91-a6e8-a6929e4d8879
+@companyId = 8862902c-902f-43e5-8f78-7d499bb10731
+@deliveryAreaId = 632e3444-42a0-40f0-864e-a1c692e56179
 
 
 ### 업체 생성
@@ -34,40 +34,64 @@ Content-Type: application/json
   "description": "kafka 수정 테스트"
 }
 
-### 업체 삭제
-DELETE http://localhost:19082/api/v1/companies/{{companyId}}
-
-
-
-### 업체 배달 가능 지역 생성
+### 배송 가능 지역/시간 생성 - 강남구 아침
 POST http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas
 Content-Type: application/json
 
 {
   "region": "GANGNAM",
-  "estimatedDeliveryMinutes": 60
-}
+  "mealPeriod": "BREAKFAST",
+  "estimatedArrivalStartTime": "07:00",
+  "estimatedArrivalEndTime": "08:00"
 }
 
-### 업체 배달 가능 지역 목록 조회
-GET http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas
 
-### 업체 배달 가능 지역 수정
-PATCH http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas/{{deliveryAreaId}}
+### 배송 가능 지역/시간 생성 - 강남구 점심
+POST http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas
+Content-Type: application/json
+
+{
+  "region": "GANGNAM",
+  "mealPeriod": "LUNCH",
+  "estimatedArrivalStartTime": "11:30",
+  "estimatedArrivalEndTime": "13:00"
+}
+
+
+### 배송 가능 지역/시간 생성 - 서초구 아침
+POST http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas
 Content-Type: application/json
 
 {
   "region": "SEOCHO",
-  "estimatedDeliveryMinutes": 40
+  "mealPeriod": "BREAKFAST",
+  "estimatedArrivalStartTime": "07:30",
+  "estimatedArrivalEndTime": "08:30"
 }
 
-### 업체 배달 가능 지역 일부 수정 - 시간만 변경
+
+### 업체 배송 가능 지역 목록 조회
+GET http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas
+
+
+### 배송 가능 지역/시간 수정
 PATCH http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas/{{deliveryAreaId}}
 Content-Type: application/json
 
 {
-  "estimatedDeliveryMinutes": 35
+  "region": "GANGNAM",
+  "mealPeriod": "BREAKFAST",
+  "estimatedArrivalStartTime": "07:10",
+  "estimatedArrivalEndTime": "08:10"
 }
 
-### 업체 배달 가능 지역 삭제
+
+### 배송 가능 지역/시간 삭제
 DELETE http://localhost:19082/api/v1/companies/{{companyId}}/delivery-areas/{{deliveryAreaId}}
+
+
+### 업체 삭제
+DELETE http://localhost:19082/api/v1/companies/{{companyId}}
+
+
+

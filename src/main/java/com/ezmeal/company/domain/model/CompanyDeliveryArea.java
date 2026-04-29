@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,40 +37,65 @@ public class CompanyDeliveryArea extends BaseEntity {
     @Column(name = "delivery_region", nullable = false)
     private DeliveryRegion region;
 
-    @Column(name = "estimated_delivery_minutes", nullable = false)
-    private Integer estimatedDeliveryMinutes;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "meal_period", nullable = false)
+    private CompanyMealPeriod mealPeriod;
 
-    public CompanyDeliveryArea(Company company, DeliveryRegion region, Integer estimatedDeliveryMinutes) {
-        validation(company, region, estimatedDeliveryMinutes);
+    @Column(name = "estimated_arrival_start_time", nullable = false)
+    private LocalTime estimatedArrivalStartTime;
+
+    @Column(name = "estimated_arrival_end_time", nullable = false)
+    private LocalTime estimatedArrivalEndTime;
+
+    public CompanyDeliveryArea(Company company, DeliveryRegion region, CompanyMealPeriod mealPeriod,
+                               LocalTime estimatedArrivalStartTime, LocalTime estimatedArrivalEndTime) {
+        validation(company, region, mealPeriod, estimatedArrivalStartTime, estimatedArrivalEndTime);
 
         this.company = company;
         this.region = region;
-        this.estimatedDeliveryMinutes = estimatedDeliveryMinutes;
+        this.mealPeriod = mealPeriod;
+        this.estimatedArrivalStartTime = estimatedArrivalStartTime;
+        this.estimatedArrivalEndTime = estimatedArrivalEndTime;
     }
 
-    public void update(DeliveryRegion region, Integer estimatedDeliveryMinutes) {
+    public void update(DeliveryRegion region, CompanyMealPeriod mealPeriod,
+                       LocalTime estimatedArrivalStartTime, LocalTime estimatedArrivalEndTime) {
         DeliveryRegion nextRegion = region != null ? region : this.region;
-        Integer nextEstimatedDeliveryMinutes =
-                estimatedDeliveryMinutes != null ? estimatedDeliveryMinutes : this.estimatedDeliveryMinutes;
+        CompanyMealPeriod nextMealPeriod = mealPeriod != null ? mealPeriod : this.mealPeriod;
+        LocalTime nextEstimatedArrivalStartTime =
+                estimatedArrivalStartTime != null ? estimatedArrivalStartTime : this.estimatedArrivalStartTime;
+        LocalTime nextEstimatedArrivalEndTime =
+                estimatedArrivalEndTime != null ? estimatedArrivalEndTime : this.estimatedArrivalEndTime;
 
-        validation(this.company, nextRegion, nextEstimatedDeliveryMinutes);
+        validation(this.company, nextRegion, nextMealPeriod, nextEstimatedArrivalStartTime,
+                nextEstimatedArrivalEndTime);
 
         this.region = nextRegion;
-        this.estimatedDeliveryMinutes = nextEstimatedDeliveryMinutes;
+        this.mealPeriod = nextMealPeriod;
+        this.estimatedArrivalStartTime = nextEstimatedArrivalStartTime;
+        this.estimatedArrivalEndTime = nextEstimatedArrivalEndTime;
+
     }
 
-    private void validation(Company company, DeliveryRegion region, Integer estimatedDeliveryMinutes) {
+    private void validation(Company company, DeliveryRegion region, CompanyMealPeriod mealPeriod,
+                            LocalTime estimatedArrivalStartTime, LocalTime estimatedArrivalEndTime) {
         if (company == null) {
-            throw new IllegalArgumentException("업체는 존재해야 합니다.");
+            throw new IllegalArgumentException("업체는 필수입니다.");
         }
         if (region == null) {
-            throw new IllegalArgumentException("지역은 존재해야 합니다.");
+            throw new IllegalArgumentException("배송 지역은 필수입니다.");
         }
-        if (estimatedDeliveryMinutes == null) {
-            throw new IllegalArgumentException("배달 예상 시간은 존재해야 합니다.");
+        if (mealPeriod == null) {
+            throw new IllegalArgumentException("식사 시간대는 필수입니다.");
         }
-        if (estimatedDeliveryMinutes <= 0) {
-            throw new IllegalArgumentException("배달 예상 시간은 1분 이상이어야 합니다.");
+        if (estimatedArrivalStartTime == null) {
+            throw new IllegalArgumentException("도착 예정 시작 시간은 필수입니다.");
+        }
+        if (estimatedArrivalEndTime == null) {
+            throw new IllegalArgumentException("도착 예정 종료 시간은 필수입니다.");
+        }
+        if (!estimatedArrivalStartTime.isBefore(estimatedArrivalEndTime)) {
+            throw new IllegalArgumentException("도착 예정 시작 시간은 종료 시간보다 빨라야 합니다.");
         }
     }
 }

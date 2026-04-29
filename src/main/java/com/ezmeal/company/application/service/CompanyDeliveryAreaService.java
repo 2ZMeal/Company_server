@@ -7,9 +7,11 @@ import com.ezmeal.company.application.dto.response.CompanyDeliveryAreaResponse;
 import com.ezmeal.company.domain.exception.CompanyErrorCode;
 import com.ezmeal.company.domain.model.Company;
 import com.ezmeal.company.domain.model.CompanyDeliveryArea;
+import com.ezmeal.company.domain.model.CompanyMealPeriod;
 import com.ezmeal.company.domain.model.DeliveryRegion;
 import com.ezmeal.company.domain.repository.CompanyDeliveryAreaRepository;
 import com.ezmeal.company.domain.repository.CompanyRepository;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +32,17 @@ public class CompanyDeliveryAreaService {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
-        boolean exists = companyDeliveryAreaRepository.existsByCompany_IdAndRegionAndDeletedAtIsNull(companyId,
-                companyDeliveryAreaCreateRequest.region());
+        boolean exists = companyDeliveryAreaRepository.existsByCompany_IdAndRegionAndMealPeriodAndDeletedAtIsNull(
+                companyId,
+                companyDeliveryAreaCreateRequest.region(), companyDeliveryAreaCreateRequest.mealPeriod());
         if (exists) {
             throw new CustomException(CompanyErrorCode.COMPANY_DELIVERY_AREA_ALREADY_EXISTS);
         }
 
         CompanyDeliveryArea companyDeliveryArea = new CompanyDeliveryArea(company,
-                companyDeliveryAreaCreateRequest.region(), companyDeliveryAreaCreateRequest.estimatedDeliveryMinutes());
+                companyDeliveryAreaCreateRequest.region(), companyDeliveryAreaCreateRequest.mealPeriod(),
+                companyDeliveryAreaCreateRequest.estimatedArrivalStartTime(),
+                companyDeliveryAreaCreateRequest.estimatedArrivalEndTime());
 
         CompanyDeliveryArea companyDeliveryAreaSaved = companyDeliveryAreaRepository.save(companyDeliveryArea);
 
@@ -56,22 +61,41 @@ public class CompanyDeliveryAreaService {
                 companyDeliveryAreaUpdateRequest.region() != null ? companyDeliveryAreaUpdateRequest.region()
                         : companyDeliveryArea.getRegion();
 
-        Integer nextEstimatedDeliveryMinutes = companyDeliveryAreaUpdateRequest.estimatedDeliveryMinutes() != null
-                ? companyDeliveryAreaUpdateRequest.estimatedDeliveryMinutes()
-                : companyDeliveryArea.getEstimatedDeliveryMinutes();
+        CompanyMealPeriod nextMealPeriod =
+                companyDeliveryAreaUpdateRequest.mealPeriod() != null
+                        ? companyDeliveryAreaUpdateRequest.mealPeriod()
+                        : companyDeliveryArea.getMealPeriod();
 
-        boolean sameRegion = companyDeliveryArea.getRegion() == nextRegion;
+        LocalTime nextEstimatedArrivalStartTime =
+                companyDeliveryAreaUpdateRequest.estimatedArrivalStartTime() != null
+                        ? companyDeliveryAreaUpdateRequest.estimatedArrivalStartTime()
+                        : companyDeliveryArea.getEstimatedArrivalStartTime();
 
-        if (!sameRegion) {
-            boolean exists = companyDeliveryAreaRepository.existsByCompany_IdAndRegionAndDeletedAtIsNull(companyId,
-                    nextRegion);
+        LocalTime nextEstimatedArrivalEndTime =
+                companyDeliveryAreaUpdateRequest.estimatedArrivalEndTime() != null
+                        ? companyDeliveryAreaUpdateRequest.estimatedArrivalEndTime()
+                        : companyDeliveryArea.getEstimatedArrivalEndTime();
+
+        boolean sameDeliveryOption =
+                companyDeliveryArea.getRegion() == nextRegion
+                        && companyDeliveryArea.getMealPeriod() == nextMealPeriod;
+
+        if (!sameDeliveryOption) {
+            boolean exists = companyDeliveryAreaRepository.existsByCompany_IdAndRegionAndMealPeriodAndDeletedAtIsNull(
+                    companyId,
+                    nextRegion,
+                    nextMealPeriod
+            );
 
             if (exists) {
                 throw new CustomException(CompanyErrorCode.COMPANY_DELIVERY_AREA_ALREADY_EXISTS);
             }
         }
 
-        companyDeliveryArea.update(nextRegion, nextEstimatedDeliveryMinutes);
+        companyDeliveryArea.update(nextRegion,
+                nextMealPeriod,
+                nextEstimatedArrivalStartTime,
+                nextEstimatedArrivalEndTime);
 
         return CompanyDeliveryAreaResponse.from(companyDeliveryArea);
     }
