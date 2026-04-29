@@ -119,7 +119,7 @@ public class CompanyController {
             @PathVariable UUID companyId
     ) {
         List<CompanyDeliveryAreaResponse> response =
-                companyDeliveryAreaService.getCompanyDeliveryArea(companyId);
+                companyDeliveryAreaService.getCompanyDeliveryAreas(companyId);
 
         return ResponseEntity.ok(
                 CommonApiResponse.success("배달 가능 지역 목록이 조회되었습니다.", response)

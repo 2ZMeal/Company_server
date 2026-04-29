@@ -87,7 +87,10 @@ public class CompanyDeliveryAreaService {
     }
 
     @Transactional(readOnly = true)
-    public List<CompanyDeliveryAreaResponse> getCompanyDeliveryArea(UUID companyId) {
+    public List<CompanyDeliveryAreaResponse> getCompanyDeliveryAreas(UUID companyId) {
+        companyRepository.findByIdAndDeletedAtIsNull(companyId)
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
         return companyDeliveryAreaRepository.findAllByCompany_IdAndDeletedAtIsNull(companyId).stream()
                 .map(CompanyDeliveryAreaResponse::from).toList();
     }

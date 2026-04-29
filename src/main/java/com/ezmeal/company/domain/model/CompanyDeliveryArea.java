@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,14 +20,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "p_company_delivery_area",
-        schema = "company_service",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_company_delivery_area_region",
-                        columnNames = {"company_id", "delivery_region"}
-                )
-        })
+@Table(name = "p_company_delivery_area", schema = "company_service")
 public class CompanyDeliveryArea extends BaseEntity {
 
     @Id
