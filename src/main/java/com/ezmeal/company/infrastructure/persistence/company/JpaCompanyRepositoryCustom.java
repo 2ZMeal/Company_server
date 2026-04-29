@@ -1,4 +1,4 @@
-package com.ezmeal.company.infrastructure.persistence;
+package com.ezmeal.company.infrastructure.persistence.company;
 
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.domain.model.Company;

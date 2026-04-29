@@ -1,22 +1,22 @@
 package com.ezmeal.company.domain.model;
 
 import com.ezmeal.common.entity.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 
-
-
-//추후 baseEntity가 구현되면 상속받고 deleteAt수정예정
 
 @Entity
 @Getter
@@ -28,6 +28,9 @@ public class Company extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "company_id")
     private UUID id;
+
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CompanyDeliveryArea> deliveryAreas = new ArrayList<>();
 
     @Column(name = "manager_user_id", nullable = false)
     private UUID managerUserId;
@@ -77,11 +80,21 @@ public class Company extends BaseEntity {
         if (managerUserId == null) {
             throw new IllegalArgumentException("업체 관리자 ID는 필수입니다.");
         }
+
         if (!StringUtils.hasText(name)) {
             throw new IllegalArgumentException("업체명은 필수입니다.");
+        } else if (name.length() > 255) {
+            throw new IllegalArgumentException("업체명은 길이가 255이하여야 합니다.");
         }
+
         if (!StringUtils.hasText(lotAddress) && !StringUtils.hasText(roadAddress)) {
             throw new IllegalArgumentException("도로명 주소와 지번 주소 둘 중 하나는 입력해야 됩니다.");
+        }
+        if (StringUtils.hasText(lotAddress) && lotAddress.length() > 255) {
+            throw new IllegalArgumentException("지번 주소의 길이는 255자 이하여야 합니다.");
+        }
+        if (StringUtils.hasText(roadAddress) && roadAddress.length() > 255) {
+            throw new IllegalArgumentException("도로명 주소의 길이는 255자 이하여야 합니다.");
         }
     }
 }

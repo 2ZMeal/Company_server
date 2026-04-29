@@ -1,5 +1,7 @@
 package com.ezmeal.company.domain.event.payload;
 
+import com.ezmeal.company.domain.event.EventType;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -11,6 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompanyCreatedEvent {
 
+    private UUID eventId;
+    private EventType eventType;
+    private OffsetDateTime occurredAt;
     private UUID companyId;
     private String companyName;
     private String companyLotAddress;
@@ -20,7 +25,9 @@ public class CompanyCreatedEvent {
     public static CompanyCreatedEvent of(UUID companyId, String companyName, String companyLotAddress,
                                          String companyRoadAddress, String companyDescription
     ) {
-        return new CompanyCreatedEvent(companyId, companyName, companyLotAddress, companyRoadAddress,
+        return new CompanyCreatedEvent(UUID.randomUUID(),
+                EventType.COMPANY_CREATED,
+                OffsetDateTime.now(), companyId, companyName, companyLotAddress, companyRoadAddress,
                 companyDescription);
     }
 
