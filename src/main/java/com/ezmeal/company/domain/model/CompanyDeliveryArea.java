@@ -25,8 +25,8 @@ import lombok.NoArgsConstructor;
         schema = "company_service",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_company_delivery_area_region_time",
-                        columnNames = {"company_id", "delivery_region", "estimated_delivery_minutes"}
+                        name = "uk_company_delivery_area_region",
+                        columnNames = {"company_id", "delivery_region"}
                 )
         })
 public class CompanyDeliveryArea extends BaseEntity {
