@@ -1,4 +1,4 @@
-package com.ezmeal.company.infrastructure.persistence;
+package com.ezmeal.company.infrastructure.persistence.company;
 
 import static com.ezmeal.company.domain.model.QCompany.company;
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 
 
 @RequiredArgsConstructor
-public class JpaCompanyRepositoryImpl implements JpaCompanyRepositoryCustom{
+public class JpaCompanyRepositoryImpl implements JpaCompanyRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
 
