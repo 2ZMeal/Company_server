@@ -75,7 +75,6 @@ public class Company extends BaseEntity {
     }
 
 
-    //빠지면 안되는 값들 검증
     private void validate(UUID managerUserId, String name, String lotAddress, String roadAddress) {
         if (managerUserId == null) {
             throw new IllegalArgumentException("업체 관리자 ID는 필수입니다.");

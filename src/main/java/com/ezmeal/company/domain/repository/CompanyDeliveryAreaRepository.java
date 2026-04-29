@@ -7,6 +7,7 @@ import java.util.UUID;
 
 
 public interface CompanyDeliveryAreaRepository {
+
     CompanyDeliveryArea save(CompanyDeliveryArea companyDeliveryArea);
 
     Optional<CompanyDeliveryArea> findByIdAndCompany_IdAndDeletedAtIsNull(
