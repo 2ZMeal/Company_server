@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -29,9 +30,6 @@ public class Company extends BaseEntity {
     @Column(name = "company_id")
     private UUID id;
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CompanyDeliveryArea> deliveryAreas = new ArrayList<>();
-
     @Column(name = "manager_user_id", nullable = false)
     private UUID managerUserId;
 
@@ -46,6 +44,15 @@ public class Company extends BaseEntity {
 
     @Column(name = "description", length = 255)
     private String description;
+
+
+    @Getter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CompanyDeliveryArea> deliveryAreas = new ArrayList<>();
+
+    public List<CompanyDeliveryArea> getDeliveryAreas() {
+        return Collections.unmodifiableList(deliveryAreas);
+    }
 
     //업체 생성 정보
     public Company(UUID managerUserId, String name, String lotAddress, String roadAddress,
