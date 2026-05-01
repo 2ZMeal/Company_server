@@ -129,6 +129,7 @@ public class CompanyDeliveryAreaService {
                 .map(CompanyDeliveryAreaResponse::from).toList();
     }
 
+    //배송지역 정보가 바뀔때마다 스냅샷 생성
     private void publishCompanySnapshotUpdatedEvent(UUID companyId) {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
