@@ -8,10 +8,13 @@ import com.ezmeal.company.application.dto.response.CompanyResponse;
 import com.ezmeal.company.application.dto.response.PageResponse;
 import com.ezmeal.company.domain.event.payload.CompanyCreatedEvent;
 import com.ezmeal.company.domain.event.payload.CompanyDeletedEvent;
-import com.ezmeal.company.domain.event.payload.CompanyUpdatedEvent;
+import com.ezmeal.company.domain.event.payload.CompanyDeliveryAreaEventPayload;
+import com.ezmeal.company.domain.event.payload.CompanySnapshotUpdatedEvent;
 import com.ezmeal.company.domain.exception.CompanyErrorCode;
 import com.ezmeal.company.domain.model.Company;
+import com.ezmeal.company.domain.repository.CompanyDeliveryAreaRepository;
 import com.ezmeal.company.domain.repository.CompanyRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final CompanyDeliveryAreaRepository companyDeliveryAreaRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     //인증인가가 완료되면 managerUserId는 request에서 빼고 인증 정보에서 조회예정
@@ -48,9 +52,22 @@ public class CompanyService {
 
         Company companySaved = companyRepository.save(company);
 
+        List<CompanyDeliveryAreaEventPayload> deliveryArea = getActiveDeliveryAreaPayloads(companySaved.getId());
+
         CompanyCreatedEvent event = CompanyCreatedEvent.of(companySaved.getId(), companySaved.getName(),
-                companySaved.getLotAddress(), companySaved.getRoadAddress(), companySaved.getDescription());
+                companySaved.getLotAddress(), companySaved.getRoadAddress(), companySaved.getDescription(),
+                deliveryArea);
         eventPublisher.publishEvent(event);
+
+        CompanySnapshotUpdatedEvent snapshotUpdatedEvent = CompanySnapshotUpdatedEvent.of(
+                companySaved.getId(),
+                companySaved.getName(),
+                companySaved.getLotAddress(),
+                companySaved.getRoadAddress(),
+                companySaved.getDescription(),
+                deliveryArea
+        );
+        eventPublisher.publishEvent(snapshotUpdatedEvent);
 
         return CompanyResponse.from(companySaved);
     }
@@ -70,8 +87,10 @@ public class CompanyService {
                 companyUpdateRequest.description()
         );
 
-        CompanyUpdatedEvent event = CompanyUpdatedEvent.of(company.getId(), company.getName(), company.getLotAddress(),
-                company.getRoadAddress(), company.getDescription());
+        List<CompanyDeliveryAreaEventPayload> deliveryArea = getActiveDeliveryAreaPayloads(company.getId());
+
+        CompanySnapshotUpdatedEvent event = CompanySnapshotUpdatedEvent.of(company.getId(), company.getName(), company.getLotAddress(),
+                company.getRoadAddress(), company.getDescription(), deliveryArea);
         eventPublisher.publishEvent(event);
 
         return CompanyResponse.from(company);
@@ -110,4 +129,12 @@ public class CompanyService {
 
         return PageResponse.from(responses);
     }
+
+    //배송지역 엔티티에서 뽑은 배송정보들을 배송정보이벤트dto로 바꾸고 리스트로 모음
+    private List<CompanyDeliveryAreaEventPayload> getActiveDeliveryAreaPayloads(UUID companyId) {
+        return companyDeliveryAreaRepository.findAllByCompany_IdAndDeletedAtIsNull(companyId).stream()
+                .map(CompanyDeliveryAreaEventPayload::from)
+                .toList();
+    }
+
 }

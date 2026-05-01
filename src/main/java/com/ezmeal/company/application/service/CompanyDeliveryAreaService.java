@@ -4,6 +4,8 @@ import com.ezmeal.common.exception.CustomException;
 import com.ezmeal.company.application.dto.request.CompanyDeliveryAreaCreateRequest;
 import com.ezmeal.company.application.dto.request.CompanyDeliveryAreaUpdateRequest;
 import com.ezmeal.company.application.dto.response.CompanyDeliveryAreaResponse;
+import com.ezmeal.company.domain.event.payload.CompanyDeliveryAreaEventPayload;
+import com.ezmeal.company.domain.event.payload.CompanySnapshotUpdatedEvent;
 import com.ezmeal.company.domain.exception.CompanyErrorCode;
 import com.ezmeal.company.domain.model.Company;
 import com.ezmeal.company.domain.model.CompanyDeliveryArea;
@@ -15,6 +17,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,7 @@ public class CompanyDeliveryAreaService {
 
     private final CompanyDeliveryAreaRepository companyDeliveryAreaRepository;
     private final CompanyRepository companyRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public CompanyDeliveryAreaResponse create(UUID companyId,
@@ -45,6 +49,8 @@ public class CompanyDeliveryAreaService {
                 companyDeliveryAreaCreateRequest.estimatedArrivalEndTime());
 
         CompanyDeliveryArea companyDeliveryAreaSaved = companyDeliveryAreaRepository.save(companyDeliveryArea);
+
+        publishCompanySnapshotUpdatedEvent(companyId);
 
         return CompanyDeliveryAreaResponse.from(companyDeliveryAreaSaved);
     }
@@ -97,6 +103,8 @@ public class CompanyDeliveryAreaService {
                 nextEstimatedArrivalStartTime,
                 nextEstimatedArrivalEndTime);
 
+        publishCompanySnapshotUpdatedEvent(companyId);
+
         return CompanyDeliveryAreaResponse.from(companyDeliveryArea);
     }
 
@@ -108,6 +116,8 @@ public class CompanyDeliveryAreaService {
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_DELIVERY_AREA_NOT_FOUND));
 
         companyDeliveryArea.delete(deletedBy);
+
+        publishCompanySnapshotUpdatedEvent(companyId);
     }
 
     @Transactional(readOnly = true)
@@ -117,5 +127,23 @@ public class CompanyDeliveryAreaService {
 
         return companyDeliveryAreaRepository.findAllByCompany_IdAndDeletedAtIsNull(companyId).stream()
                 .map(CompanyDeliveryAreaResponse::from).toList();
+    }
+
+    private void publishCompanySnapshotUpdatedEvent(UUID companyId) {
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
+        List<CompanyDeliveryAreaEventPayload> deliveryAreas =
+                companyDeliveryAreaRepository.findAllByCompany_IdAndDeletedAtIsNull(companyId).stream()
+                        .map(CompanyDeliveryAreaEventPayload::from)
+                        .toList();
+
+        eventPublisher.publishEvent(CompanySnapshotUpdatedEvent.of(
+                company.getId(),
+                company.getName(),
+                company.getLotAddress(),
+                company.getRoadAddress(),
+                company.getDescription(),
+                deliveryAreas));
     }
 }

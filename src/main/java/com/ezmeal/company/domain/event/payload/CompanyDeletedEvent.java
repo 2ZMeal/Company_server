@@ -1,6 +1,6 @@
 package com.ezmeal.company.domain.event.payload;
 
-import com.ezmeal.company.domain.event.EventType;
+import com.ezmeal.company.domain.event.CompanyEventType;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class CompanyDeletedEvent {
 
     private UUID eventId;
-    private EventType eventType;
+    private CompanyEventType companyEventType;
     private OffsetDateTime occurredAt;
     private UUID companyId;
 
@@ -22,7 +22,7 @@ public class CompanyDeletedEvent {
     public static CompanyDeletedEvent of(UUID companyId
     ) {
         return new CompanyDeletedEvent(UUID.randomUUID(),
-                EventType.COMPANY_DELETED,
+                CompanyEventType.COMPANY_DELETED,
                 OffsetDateTime.now(), companyId);
     }
 }

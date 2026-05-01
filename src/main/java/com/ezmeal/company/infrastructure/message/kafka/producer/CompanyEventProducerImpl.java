@@ -3,7 +3,7 @@ package com.ezmeal.company.infrastructure.message.kafka.producer;
 import com.ezmeal.company.domain.event.CompanyEventProducer;
 import com.ezmeal.company.domain.event.payload.CompanyCreatedEvent;
 import com.ezmeal.company.domain.event.payload.CompanyDeletedEvent;
-import com.ezmeal.company.domain.event.payload.CompanyUpdatedEvent;
+import com.ezmeal.company.domain.event.payload.CompanySnapshotUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -26,9 +26,9 @@ public class CompanyEventProducerImpl implements CompanyEventProducer {
     }
 
     @Override
-    public void publishUpdatedEvent(CompanyUpdatedEvent event) {
+    public void publishSnapshotUpdatedEvent(CompanySnapshotUpdatedEvent event) {
 // 헤더와 페이로드를 함께 담아서 보내는 sendWithHeaders를 사용
-        sendWithHeaders("company.updated", event);
+        sendWithHeaders("company.snapshot.updated", event);
     }
 
     @Override
