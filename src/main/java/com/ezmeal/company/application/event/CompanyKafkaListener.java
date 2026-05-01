@@ -3,7 +3,7 @@ package com.ezmeal.company.application.event;
 import com.ezmeal.company.domain.event.CompanyEventProducer;
 import com.ezmeal.company.domain.event.payload.CompanyCreatedEvent;
 import com.ezmeal.company.domain.event.payload.CompanyDeletedEvent;
-import com.ezmeal.company.domain.event.payload.CompanyUpdatedEvent;
+import com.ezmeal.company.domain.event.payload.CompanySnapshotUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -22,8 +22,8 @@ public class CompanyKafkaListener {
 
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleCompanyUpdatedEvent(CompanyUpdatedEvent event) {
-        companyEventProducer.publishUpdatedEvent(event);
+    public void handleCompanyUpdatedEvent(CompanySnapshotUpdatedEvent event) {
+        companyEventProducer.publishSnapshotUpdatedEvent(event);
     }
 
 

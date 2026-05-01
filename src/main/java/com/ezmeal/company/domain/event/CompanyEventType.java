@@ -1,7 +1,7 @@
 package com.ezmeal.company.domain.event;
 
-public enum EventType {
+public enum CompanyEventType {
     COMPANY_CREATED,
-    COMPANY_UPDATED,
+    COMPANY_SNAPSHOT_UPDATED,
     COMPANY_DELETED
 }

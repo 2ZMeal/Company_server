@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class CompanyCreatedEvent {
+public class CompanySnapshotUpdatedEvent {
 
     private UUID eventId;
     private CompanyEventType companyEventType;
@@ -24,13 +24,13 @@ public class CompanyCreatedEvent {
     private String companyDescription;
     private List<CompanyDeliveryAreaEventPayload> deliveryAreas;
 
-    public static CompanyCreatedEvent of(UUID companyId, String companyName, String companyLotAddress,
-                                         String companyRoadAddress, String companyDescription,
-                                         List<CompanyDeliveryAreaEventPayload> deliveryAreas) {
-        return new CompanyCreatedEvent(UUID.randomUUID(),
-                CompanyEventType.COMPANY_CREATED,
+    public static CompanySnapshotUpdatedEvent of(UUID companyId, String companyName, String companyLotAddress,
+                                                 String companyRoadAddress, String companyDescription,
+                                                 List<CompanyDeliveryAreaEventPayload> deliveryAreas
+    ) {
+        return new CompanySnapshotUpdatedEvent(UUID.randomUUID(),
+                CompanyEventType.COMPANY_SNAPSHOT_UPDATED,
                 OffsetDateTime.now(), companyId, companyName, companyLotAddress, companyRoadAddress,
                 companyDescription, deliveryAreas);
     }
-
 }
