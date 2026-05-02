@@ -18,19 +18,21 @@ public class CompanySnapshotUpdatedEvent {
     private CompanyEventType companyEventType;
     private OffsetDateTime occurredAt;
     private UUID companyId;
+    private UUID managerUserId;
     private String companyName;
     private String companyLotAddress;
     private String companyRoadAddress;
     private String companyDescription;
     private List<CompanyDeliveryAreaEventPayload> deliveryAreas;
 
-    public static CompanySnapshotUpdatedEvent of(UUID companyId, String companyName, String companyLotAddress,
+    public static CompanySnapshotUpdatedEvent of(UUID companyId, UUID managerUserId, String companyName,
+                                                 String companyLotAddress,
                                                  String companyRoadAddress, String companyDescription,
                                                  List<CompanyDeliveryAreaEventPayload> deliveryAreas
     ) {
         return new CompanySnapshotUpdatedEvent(UUID.randomUUID(),
                 CompanyEventType.COMPANY_SNAPSHOT_UPDATED,
-                OffsetDateTime.now(), companyId, companyName, companyLotAddress, companyRoadAddress,
+                OffsetDateTime.now(), companyId, managerUserId, companyName, companyLotAddress, companyRoadAddress,
                 companyDescription, deliveryAreas);
     }
 }

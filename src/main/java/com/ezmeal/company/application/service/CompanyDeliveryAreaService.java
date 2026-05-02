@@ -32,12 +32,13 @@ public class CompanyDeliveryAreaService {
 
     @Transactional
     public CompanyDeliveryAreaResponse create(UUID companyId,
-                                              CompanyDeliveryAreaCreateRequest companyDeliveryAreaCreateRequest,String userId,Role role) {
+                                              CompanyDeliveryAreaCreateRequest companyDeliveryAreaCreateRequest,
+                                              String userId, Role role) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
-        validateCompanyAccess(company,userId,role);
+        validateCompanyAccess(company, userId, role);
 
         boolean exists = companyDeliveryAreaRepository.existsByCompany_IdAndRegionAndMealPeriodAndDeletedAtIsNull(
                 companyId,
@@ -60,7 +61,8 @@ public class CompanyDeliveryAreaService {
 
     @Transactional
     public CompanyDeliveryAreaResponse update(UUID deliveryAreaId, UUID companyId,
-                                              CompanyDeliveryAreaUpdateRequest companyDeliveryAreaUpdateRequest,String userId,Role role) {
+                                              CompanyDeliveryAreaUpdateRequest companyDeliveryAreaUpdateRequest,
+                                              String userId, Role role) {
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
@@ -116,7 +118,7 @@ public class CompanyDeliveryAreaService {
     }
 
     @Transactional
-    public void delete(UUID deliveryAreaId, UUID companyId, String userId,Role role) {
+    public void delete(UUID deliveryAreaId, UUID companyId, String userId, Role role) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
@@ -166,6 +168,7 @@ public class CompanyDeliveryAreaService {
 
         eventPublisher.publishEvent(CompanySnapshotUpdatedEvent.of(
                 company.getId(),
+                company.getManagerUserId(),
                 company.getName(),
                 company.getLotAddress(),
                 company.getRoadAddress(),

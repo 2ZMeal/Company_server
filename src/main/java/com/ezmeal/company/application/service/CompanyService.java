@@ -64,6 +64,7 @@ public class CompanyService {
 
         CompanySnapshotUpdatedEvent snapshotUpdatedEvent = CompanySnapshotUpdatedEvent.of(
                 companySaved.getId(),
+                companySaved.getManagerUserId(),
                 companySaved.getName(),
                 companySaved.getLotAddress(),
                 companySaved.getRoadAddress(),
@@ -95,7 +96,8 @@ public class CompanyService {
 
         List<CompanyDeliveryAreaEventPayload> deliveryArea = getActiveDeliveryAreaPayloads(company.getId());
 
-        CompanySnapshotUpdatedEvent event = CompanySnapshotUpdatedEvent.of(company.getId(), company.getName(),
+        CompanySnapshotUpdatedEvent event = CompanySnapshotUpdatedEvent.of(company.getId(), company.getManagerUserId(),
+                company.getName(),
                 company.getLotAddress(),
                 company.getRoadAddress(), company.getDescription(), deliveryArea);
         eventPublisher.publishEvent(event);
