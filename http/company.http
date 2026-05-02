@@ -1,14 +1,16 @@
-@companyId = 8862902c-902f-43e5-8f78-7d499bb10731
-@deliveryAreaId = 632e3444-42a0-40f0-864e-a1c692e56179
+@companyId = ed7bc8cb-0457-481e-b6e0-72935c04814f
+@deliveryAreaId = 4806c505-c69e-4526-beaf-e2303ed7eefa
 
 
 ### 업체 생성
 POST http://localhost:19082/api/v1/companies
 Content-Type: application/json
+X-User-Id: 11111111-1111-1111-1111-111111111111
+X-User-Role: COMPANY
 
 {
   "managerUserId": "11111111-1111-1111-1111-111111111111",
-  "name": "테스트 업체125",
+  "name": "테스트 업체456",
   "lotAddress": "서울시 해운대구 가로수길 12",
   "roadAddress": "서울시 해운대구 가로수길 12",
   "description": "HTTP 테스트용 업체"
@@ -26,6 +28,8 @@ GET http://localhost:19082/api/v1/companies/{{companyId}}
 ### 업체 수정
 PATCH http://localhost:19082/api/v1/companies/{{companyId}}
 Content-Type: application/json
+X-User-Id: 11111111-1111-1111-1111-111111111111
+X-User-Role: ADMIN
 
 {
   "name": "kafka test 수정된 업체",

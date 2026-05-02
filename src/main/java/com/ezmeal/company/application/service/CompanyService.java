@@ -1,5 +1,6 @@
 package com.ezmeal.company.application.service;
 
+import com.ezmeal.common.enums.Role;
 import com.ezmeal.common.exception.CustomException;
 import com.ezmeal.company.application.dto.request.CompanyCreateRequest;
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
@@ -35,7 +36,9 @@ public class CompanyService {
 
     //업체 생성
     @Transactional
-    public CompanyResponse createCompany(CompanyCreateRequest companyCreateRequest) {
+    public CompanyResponse createCompany(CompanyCreateRequest companyCreateRequest, String userId, Role role) {
+
+        UUID managerUserId = resolveManagerUserId(userId, role);
 
         boolean exists = companyRepository.existsByNameAndDeletedAtIsNull(companyCreateRequest.name());
         if (exists) {
@@ -43,7 +46,7 @@ public class CompanyService {
         }
 
         Company company = new Company(
-                companyCreateRequest.managerUserId(),
+                managerUserId,
                 companyCreateRequest.name(),
                 companyCreateRequest.lotAddress(),
                 companyCreateRequest.roadAddress(),
@@ -75,10 +78,13 @@ public class CompanyService {
 
     //업체 수정
     @Transactional
-    public CompanyResponse updateCompany(UUID companyId, CompanyUpdateRequest companyUpdateRequest) {
+    public CompanyResponse updateCompany(UUID companyId, CompanyUpdateRequest companyUpdateRequest, String userId,
+                                         Role role) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
+        validateCompanyAccess(company, userId, role);
 
         company.update(
                 companyUpdateRequest.name(),
@@ -89,7 +95,8 @@ public class CompanyService {
 
         List<CompanyDeliveryAreaEventPayload> deliveryArea = getActiveDeliveryAreaPayloads(company.getId());
 
-        CompanySnapshotUpdatedEvent event = CompanySnapshotUpdatedEvent.of(company.getId(), company.getName(), company.getLotAddress(),
+        CompanySnapshotUpdatedEvent event = CompanySnapshotUpdatedEvent.of(company.getId(), company.getName(),
+                company.getLotAddress(),
                 company.getRoadAddress(), company.getDescription(), deliveryArea);
         eventPublisher.publishEvent(event);
 
@@ -98,12 +105,14 @@ public class CompanyService {
 
     //업체 논리 삭제
     @Transactional
-    public void deleteCompany(UUID companyId, String deletedBy) {
+    public void deleteCompany(UUID companyId, String userId, Role role) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
-        company.delete(deletedBy);
+        validateCompanyAccess(company, userId, role);
+
+        company.delete(userId);
 
         CompanyDeletedEvent event = CompanyDeletedEvent.of(company.getId());
         eventPublisher.publishEvent(event);
@@ -128,6 +137,28 @@ public class CompanyService {
         Page<CompanyResponse> responses = companies.map(CompanyResponse::from);
 
         return PageResponse.from(responses);
+    }
+
+    private UUID resolveManagerUserId(String userId, Role role) {
+
+        if (role == Role.COMPANY) {
+            return UUID.fromString(userId);
+        }
+        throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+    }
+
+    private void validateCompanyAccess(Company company, String userId, Role role) {
+        if (role == Role.ADMIN) {
+            return;
+        }
+
+        if (role != Role.COMPANY) {
+            throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+        }
+
+        if (!company.getManagerUserId().equals(UUID.fromString(userId))) {
+            throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+        }
     }
 
     //배송지역 엔티티에서 뽑은 배송정보들을 배송정보이벤트dto로 바꾸고 리스트로 모음
