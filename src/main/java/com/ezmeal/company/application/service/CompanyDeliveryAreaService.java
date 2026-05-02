@@ -1,5 +1,6 @@
 package com.ezmeal.company.application.service;
 
+import com.ezmeal.common.enums.Role;
 import com.ezmeal.common.exception.CustomException;
 import com.ezmeal.company.application.dto.request.CompanyDeliveryAreaCreateRequest;
 import com.ezmeal.company.application.dto.request.CompanyDeliveryAreaUpdateRequest;
@@ -31,10 +32,12 @@ public class CompanyDeliveryAreaService {
 
     @Transactional
     public CompanyDeliveryAreaResponse create(UUID companyId,
-                                              CompanyDeliveryAreaCreateRequest companyDeliveryAreaCreateRequest) {
+                                              CompanyDeliveryAreaCreateRequest companyDeliveryAreaCreateRequest,String userId,Role role) {
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
+        validateCompanyAccess(company,userId,role);
 
         boolean exists = companyDeliveryAreaRepository.existsByCompany_IdAndRegionAndMealPeriodAndDeletedAtIsNull(
                 companyId,
@@ -57,7 +60,11 @@ public class CompanyDeliveryAreaService {
 
     @Transactional
     public CompanyDeliveryAreaResponse update(UUID deliveryAreaId, UUID companyId,
-                                              CompanyDeliveryAreaUpdateRequest companyDeliveryAreaUpdateRequest) {
+                                              CompanyDeliveryAreaUpdateRequest companyDeliveryAreaUpdateRequest,String userId,Role role) {
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
+        validateCompanyAccess(company, userId, role);
 
         CompanyDeliveryArea companyDeliveryArea = companyDeliveryAreaRepository.findByIdAndCompany_IdAndDeletedAtIsNull(
                         deliveryAreaId, companyId)
@@ -109,13 +116,17 @@ public class CompanyDeliveryAreaService {
     }
 
     @Transactional
-    public void delete(UUID deliveryAreaId, UUID companyId, String deletedBy) {
+    public void delete(UUID deliveryAreaId, UUID companyId, String userId,Role role) {
 
-        CompanyDeliveryArea companyDeliveryArea = companyDeliveryAreaRepository.findByIdAndCompany_IdAndDeletedAtIsNull(
-                        deliveryAreaId, companyId)
-                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_DELIVERY_AREA_NOT_FOUND));
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+        validateCompanyAccess(company, userId, role);
 
-        companyDeliveryArea.delete(deletedBy);
+        CompanyDeliveryArea deliveryArea =
+                companyDeliveryAreaRepository.findByIdAndCompany_IdAndDeletedAtIsNull(deliveryAreaId, companyId)
+                        .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_DELIVERY_AREA_NOT_FOUND));
+
+        deliveryArea.delete(userId);
 
         publishCompanySnapshotUpdatedEvent(companyId);
     }
@@ -127,6 +138,20 @@ public class CompanyDeliveryAreaService {
 
         return companyDeliveryAreaRepository.findAllByCompany_IdAndDeletedAtIsNull(companyId).stream()
                 .map(CompanyDeliveryAreaResponse::from).toList();
+    }
+
+    private void validateCompanyAccess(Company company, String userId, Role role) {
+        if (role == Role.ADMIN) {
+            return;
+        }
+
+        if (role != Role.COMPANY) {
+            throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+        }
+
+        if (!company.getManagerUserId().equals(UUID.fromString(userId))) {
+            throw new CustomException(CompanyErrorCode.COMPANY_ACCESS_DENIED);
+        }
     }
 
     //배송지역 정보가 바뀔때마다 스냅샷 생성

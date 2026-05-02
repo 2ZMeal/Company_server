@@ -1,13 +1,17 @@
 package com.ezmeal.company.infrastructure.message.kafka.producer;
 
+import com.ezmeal.common.security.principal.CustomUserPrincipal;
 import com.ezmeal.company.domain.event.CompanyEventProducer;
 import com.ezmeal.company.domain.event.payload.CompanyCreatedEvent;
 import com.ezmeal.company.domain.event.payload.CompanyDeletedEvent;
 import com.ezmeal.company.domain.event.payload.CompanySnapshotUpdatedEvent;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 
@@ -43,13 +47,13 @@ public class CompanyEventProducerImpl implements CompanyEventProducer {
         ProducerRecord<String, Object> record = new ProducerRecord<>(topic, payload);
 
         // 2. 현재 스레드의 인증 정보(SecurityContext)를 가져옴
-        //Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // 3. 인증 정보가 있는 유저의 요청일 경우에만 카프카 헤더 추가
-//        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserPrincipal principal) {
-//            record.headers().add("X-User-Id", principal.getUserId().getBytes(StandardCharsets.UTF_8));
-//            record.headers().add("X-User-Role", principal.getRole().name().getBytes(StandardCharsets.UTF_8));
-//        }
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof CustomUserPrincipal principal) {
+            record.headers().add("X-User-Id", principal.getUserId().getBytes(StandardCharsets.UTF_8));
+            record.headers().add("X-User-Role", principal.getRole().name().getBytes(StandardCharsets.UTF_8));
+        }
 
         // 4. 카프카로 전송
         kafkaTemplate.send(record)
