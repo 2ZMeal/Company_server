@@ -1,5 +1,5 @@
-@companyId = 434a31fb-9a35-44aa-83e0-a0fdd9ab140d
-@deliveryAreaId = 3b4cc2d9-bd97-4244-b1a5-3b6c697ba529
+@companyId = 34cd26d4-fbf7-4fb8-8a92-267debab5a0a
+@deliveryAreaId = 8c44bbab-1617-4339-876b-9b28e801cecf
 
 
 ### 업체 생성
@@ -98,8 +98,8 @@ X-User-Email: test@google.com
 {
   "region": "GANGNAM",
   "mealPeriod": "BREAKFAST",
-  "estimatedArrivalStartTime": "07:10",
-  "estimatedArrivalEndTime": "08:10"
+  "estimatedArrivalStartTime": "07:15",
+  "estimatedArrivalEndTime": "08:14"
 }
 
 
