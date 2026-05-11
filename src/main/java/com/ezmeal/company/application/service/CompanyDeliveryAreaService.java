@@ -5,6 +5,7 @@ import com.ezmeal.common.exception.CustomException;
 import com.ezmeal.company.application.dto.request.CompanyDeliveryAreaCreateRequest;
 import com.ezmeal.company.application.dto.request.CompanyDeliveryAreaUpdateRequest;
 import com.ezmeal.company.application.dto.response.CompanyDeliveryAreaResponse;
+import com.ezmeal.company.domain.event.CompanyEventProducer;
 import com.ezmeal.company.domain.event.payload.CompanyDeliveryAreaEventPayload;
 import com.ezmeal.company.domain.event.payload.CompanySnapshotUpdatedEvent;
 import com.ezmeal.company.domain.exception.CompanyErrorCode;
@@ -18,7 +19,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,7 @@ public class CompanyDeliveryAreaService {
 
     private final CompanyDeliveryAreaRepository companyDeliveryAreaRepository;
     private final CompanyRepository companyRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CompanyEventProducer companyEventProducer;
 
     @Transactional
     public CompanyDeliveryAreaResponse create(UUID companyId,
@@ -166,7 +166,7 @@ public class CompanyDeliveryAreaService {
                         .map(CompanyDeliveryAreaEventPayload::from)
                         .toList();
 
-        eventPublisher.publishEvent(CompanySnapshotUpdatedEvent.of(
+        companyEventProducer.publishSnapshotUpdatedEvent(CompanySnapshotUpdatedEvent.of(
                 company.getId(),
                 company.getManagerUserId(),
                 company.getName(),

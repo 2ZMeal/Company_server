@@ -7,6 +7,7 @@ import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
 import com.ezmeal.company.application.dto.response.CompanyResponse;
 import com.ezmeal.company.application.dto.response.PageResponse;
+import com.ezmeal.company.domain.event.CompanyEventProducer;
 import com.ezmeal.company.domain.event.payload.CompanyCreatedEvent;
 import com.ezmeal.company.domain.event.payload.CompanyDeletedEvent;
 import com.ezmeal.company.domain.event.payload.CompanyDeliveryAreaEventPayload;
@@ -18,7 +19,6 @@ import com.ezmeal.company.domain.repository.CompanyRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,9 +30,8 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final CompanyDeliveryAreaRepository companyDeliveryAreaRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CompanyEventProducer companyEventProducer;
 
-    //인증인가가 완료되면 managerUserId는 request에서 빼고 인증 정보에서 조회예정
 
     //업체 생성
     @Transactional
@@ -60,7 +59,7 @@ public class CompanyService {
         CompanyCreatedEvent event = CompanyCreatedEvent.of(companySaved.getId(), companySaved.getName(),
                 companySaved.getLotAddress(), companySaved.getRoadAddress(), companySaved.getDescription(),
                 deliveryArea);
-        eventPublisher.publishEvent(event);
+        companyEventProducer.publishCreatedEvent(event);
 
         CompanySnapshotUpdatedEvent snapshotUpdatedEvent = CompanySnapshotUpdatedEvent.of(
                 companySaved.getId(),
@@ -71,7 +70,7 @@ public class CompanyService {
                 companySaved.getDescription(),
                 deliveryArea
         );
-        eventPublisher.publishEvent(snapshotUpdatedEvent);
+        companyEventProducer.publishSnapshotUpdatedEvent(snapshotUpdatedEvent);
 
         return CompanyResponse.from(companySaved);
     }
@@ -100,7 +99,7 @@ public class CompanyService {
                 company.getName(),
                 company.getLotAddress(),
                 company.getRoadAddress(), company.getDescription(), deliveryArea);
-        eventPublisher.publishEvent(event);
+        companyEventProducer.publishSnapshotUpdatedEvent(event);
 
         return CompanyResponse.from(company);
     }
@@ -117,7 +116,7 @@ public class CompanyService {
         company.delete(userId);
 
         CompanyDeletedEvent event = CompanyDeletedEvent.of(company.getId());
-        eventPublisher.publishEvent(event);
+        companyEventProducer.publishDeletedEvent(event);
 
     }
 
