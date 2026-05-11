@@ -36,8 +36,11 @@ dependencyManagement {
 }
 
 dependencies {
+	//elestic
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
 	// 공통 모듈
-	implementation 'com.ezmeal:common:0.0.5'
+	implementation 'com.ezmeal:common:0.1.2'
 
 	//querydsl
 	annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
