@@ -15,7 +15,10 @@ public enum CompanyErrorCode implements ErrorCode {
     COMPANY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "COMPANY_403", "업체에 접근할 권한이 없습니다."),
 
     COMPANY_DELIVERY_AREA_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_DELIVERY_AREA_404", "배달 지역을 찾을 수 없습니다."),
-    COMPANY_DELIVERY_AREA_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPANY_DELIVERY_AREA_409", "이미 등록된 업체 배달 가능 지역입니다.");
+    COMPANY_DELIVERY_AREA_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPANY_DELIVERY_AREA_409", "이미 등록된 업체 배달 가능 지역입니다."),
+
+    COMPANY_INVALID_MANAGER_USER_ID(HttpStatus.BAD_REQUEST, "COMPANY_400", "업체 관리자 ID 형식이 올바르지 않습니다.");
+
     private final HttpStatus status;
     private final String code;
     private final String message;

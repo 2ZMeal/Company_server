@@ -170,12 +170,21 @@ public class CompanyService {
                 .toList();
     }
 
+    //주문에서 요청한 업체관리자id
     public CompanyInfo getCompanyInfoByManagerUserId(String managerUserId) {
-        UUID managerId = UUID.fromString(managerUserId);
+        UUID managerId = parseManagerUserId(managerUserId);
 
         Company company = companyRepository.findByManagerUserIdAndDeletedAtIsNull(managerId)
                 .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
 
         return CompanyInfo.from(company);
+    }
+
+    private UUID parseManagerUserId(String managerUserId) {
+        try {
+            return UUID.fromString(managerUserId);
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(CompanyErrorCode.COMPANY_INVALID_MANAGER_USER_ID);
+        }
     }
 }
