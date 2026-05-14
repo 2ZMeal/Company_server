@@ -36,4 +36,9 @@ public class CompanyRepositoryImpl implements CompanyRepository{
         return jpaCompanyRepository.searchCompanies(request,pageable);
     }
 
+    @Override
+    public Optional<Company> findByManagerUserIdAndDeletedAtIsNull(UUID managerUserId) {
+        return jpaCompanyRepository.findByManagerUserIdAndDeletedAtIsNull(managerUserId);
+    }
+
 }
