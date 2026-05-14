@@ -13,4 +13,6 @@ public interface CompanyRepository {
     Optional<Company> findByIdAndDeletedAtIsNull(UUID companyId);
     Boolean existsByNameAndDeletedAtIsNull(String name);
     Page<Company> searchCompanies(CompanySearchRequest request, Pageable pageable);
+
+    Optional<Company> findByManagerUserIdAndDeletedAtIsNull(UUID managerUserId);
 }

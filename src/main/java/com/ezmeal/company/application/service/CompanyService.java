@@ -5,6 +5,7 @@ import com.ezmeal.common.exception.CustomException;
 import com.ezmeal.company.application.dto.request.CompanyCreateRequest;
 import com.ezmeal.company.application.dto.request.CompanySearchRequest;
 import com.ezmeal.company.application.dto.request.CompanyUpdateRequest;
+import com.ezmeal.company.application.dto.response.CompanyInfo;
 import com.ezmeal.company.application.dto.response.CompanyResponse;
 import com.ezmeal.company.application.dto.response.PageResponse;
 import com.ezmeal.company.domain.event.CompanyEventProducer;
@@ -169,4 +170,12 @@ public class CompanyService {
                 .toList();
     }
 
+    public CompanyInfo getCompanyInfoByManagerUserId(String managerUserId) {
+        UUID managerId = UUID.fromString(managerUserId);
+
+        Company company = companyRepository.findByManagerUserIdAndDeletedAtIsNull(managerId)
+                .orElseThrow(() -> new CustomException(CompanyErrorCode.COMPANY_NOT_FOUND));
+
+        return CompanyInfo.from(company);
+    }
 }

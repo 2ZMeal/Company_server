@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface JpaCompanyRepository extends JpaRepository<Company, UUID>, JpaCompanyRepositoryCustom {
     Optional<Company> findByIdAndDeletedAtIsNull(UUID companyId);
     Boolean existsByNameAndDeletedAtIsNull(String name);
+    Optional<Company> findByManagerUserIdAndDeletedAtIsNull(UUID managerUserId);
 }
